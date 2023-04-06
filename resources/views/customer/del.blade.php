@@ -55,8 +55,8 @@
             </td>
             <td>
                 <select id="Jeniskelamin" class="FormElement ui-widget-content ui-corner-all JenisKelamin" name="Jeniskelamin" onkeyup="this.value=this.value.toUpperCase();" required value="<?php echo $jeniskelamin;?>">
-                    <option value="1">LAKI-LAKI</option>
-                    <option value="2">PEREMPUAN</option>
+                    <option value="LAKI-LAKI">LAKI-LAKI</option>
+                    <option value="PEREMPUAN">PEREMPUAN</option>
                 </select>
             </td>
         </tr>

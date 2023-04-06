@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
-use App\Models\CustomerDetail;
+use App\Models\DetailCustomer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use \stdClass;
@@ -11,6 +11,7 @@ use \stdClass;
 class CustomerController extends Controller
 {
     public $modelName = Customer::class;
+    public $modelDetail = DetailCustomer::class;
     
     public function show()
     {
@@ -71,7 +72,7 @@ class CustomerController extends Controller
 
     public function indexDetail(Request $request, $invoice) 
     {
-        $custdetail = new CustomerDetail();
+        $custdetail = new DetailCustomer();
         return response([
             'data'      => $custdetail->getByInvoice($invoice),
             'totalRows' => $custdetail->totalRows,
@@ -110,16 +111,6 @@ class CustomerController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        
-    }
-
-    /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -139,35 +130,49 @@ class CustomerController extends Controller
                 'saldo' => 'required',
             ]);
 
-            $customers = new Customer();
-            $customers->invoice       = $request->input('invoice');
-            $customers->nama          = $request->input('nama');
-            $customers->tanggal       = date('Y-m-d', strtotime($request->input('tanggal')));
-            $customers->jeniskelamin  = $request->input('jeniskelamin');
-            $customers->saldo         = intval(str_replace(".", "", $request->input('saldo')));
-            $customers->save();
-
-            $inv = $customers->invoice;
-
-            if($request->filled('NamaBarang'))
+            if($request->filled('namabarang'))
             {
-                foreach ($request->input('NamaBarang') as $index => $item)
+                $customers = new Customer();
+                $customers->invoice       = $request->input('invoice');
+                $customers->nama          = $request->input('nama');
+                $customers->tanggal       = date('Y-m-d', strtotime($request->input('tanggal')));
+                $customers->jeniskelamin  = $request->input('jeniskelamin');
+                $customers->saldo         = intval(str_replace(".", "", $request->input('saldo')));
+                $customers->save();
+
+                $inv = $customers->invoice;
+                foreach ($request->input('namabarang') as $index => $item)
                 {
-                    $custdetail = new CustomerDetail();
+                    $custdetail = new DetailCustomer();
                     $custdetail->invoice      = $inv;
                     $custdetail->namabarang   = $item;
-                    $custdetail->qty          = $request->input('Qty')[$index];
-                    $custdetail->harga        = str_replace(".", "", $request->input('Harga')[$index]);
+                    $custdetail->qty          = $request->input('qty')[$index];
+                    $custdetail->harga        = str_replace(".", "", $request->input('harga')[$index]);
                     $custdetail->save(); 
                 }
+            }
+            else
+            {
+                $customers = new Customer();
+                $customers->invoice       = $request->input('invoice');
+                $customers->nama          = $request->input('nama');
+                $customers->tanggal       = date('Y-m-d', strtotime($request->input('tanggal')));
+                $customers->jeniskelamin  = $request->input('jeniskelamin');
+                $customers->saldo         = intval(str_replace(".", "", $request->input('saldo')));
+                $customers->save();
+
+                $inv = $customers->invoice;
             }
 
             DB::commit();
             $response = [
                 'message' =>'Success',
-                'invoice' => $inv,
+                'data' => $inv,
             ];
+            
             return response()->json($response); 
+
+            dd($response);
         }
         catch(Exception $e)
         {
@@ -186,39 +191,51 @@ class CustomerController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $invoice)
+    public function update(Request $request)
     {
-        DB::beginTransaction();
+        $request->validate
+        ([
+            'invoice'      => 'required',
+            'nama'         => 'required',
+            'tanggal'      => 'required',
+            'jeniskelamin' => 'required',
+            'saldo'        => 'required',
+        ]);
+
+        $customers = new Customer();
+        $invoice       = $request->input('invoice');
+        $nama          = $request->input('nama');
+        $tanggal       = date('Y-m-d', strtotime($request->input('tanggal')));
+        $jeniskelamin  = $request->input('jeniskelamin');
+        $saldo         = intval(str_replace(".", "", $request->input('saldo')));
+        
         try
         {
-            $request->validate
-            ([
-                'invoice' => 'required',
-                'nama' => 'required',
-                'tanggal' => 'required',
-                'jeniskelamin' => 'required',
-                'saldo' => 'required',
-            ]);
-
-            $customers = new Customer();
-            $customers->invoice       = $request->input('invoice');
-            $customers->nama          = $request->input('nama');
-            $customers->tanggal       = date('Y-m-d', strtotime($request->input('tanggal')));
-            $customers->jeniskelamin  = $request->input('jeniskelamin');
-            $customers->saldo         = intval(str_replace(".", "", $request->input('saldo')));
+            DB::beginTransaction();
+            
+            $customers = Customer::where('invoice', $invoice)->firstOrFail();
+            $customers->invoice       = $invoice;
+            $customers->nama          = $nama;
+            $customers->tanggal       = $tanggal;
+            $customers->jeniskelamin  = $jeniskelamin;
+            $customers->saldo         = $saldo;
             $customers->save();
 
             $inv = $customers->invoice;
 
-            if($request->filled('NamaBarang'))
-            {
-                foreach ($request->input('NamaBarang') as $index => $item)
+            if($request->filled('namabarang'))
+            {   
+                DB::table('detail_customers')
+                ->where('invoice',$inv)
+                ->delete();
+
+                foreach ($request->input('namabarang') as $index => $item)
                 {
-                    $custdetail = new CustomerDetail();
+                    $custdetail = new DetailCustomer();
                     $custdetail->invoice      = $inv;
                     $custdetail->namabarang   = $item;
-                    $custdetail->qty          = $request->input('Qty')[$index];
-                    $custdetail->harga        = str_replace(".", "", $request->input('Harga')[$index]);
+                    $custdetail->qty          = $request->input('qty')[$index];
+                    $custdetail->harga        = str_replace(".", "", $request->input('harga')[$index]);
                     $custdetail->save(); 
                 }
             }
@@ -246,9 +263,124 @@ class CustomerController extends Controller
      * @param  int  $nvoice
      * @return \Illuminate\Http\Response
      */
-    public function destroy($invoice)
+    public function destroy(Request $request)
     {
+        //$customers = new Customer();
+        $invoice = $request->input('invoice');
         
+        try
+        {
+            DB::beginTransaction();
+            
+            DB::table('detail_customers')
+                ->where('invoice' , $invoice)
+                ->delete();
+
+            DB::table('customers')
+                ->leftJoin('detail_customers', 'customers.invoice', '=', 'detail_customers.invoice')
+                ->where('customers.invoice', $invoice) 
+                ->delete(); 
+
+            DB::commit();  
+
+            $response = [
+                'message' =>'Success',
+                'invoice' => $invoice,
+            ];
+            return response()->json($response); 
+        }
+        catch(Exception $e)
+        {
+            $res = [
+                'status' => 500,
+                'message' => $e->getMessage()
+            ];
+            return response()->json($res);
+        }
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function report(Request $request)
+    {
+        $customer = new Customer();
+
+        $page = $request->page;
+        $sidx = $request->sidx; 
+        $sord = $request->sord;
+        $start = $request->start-1;
+        $limit = $request->limit - $start;
+
+        $filterResultsJSON = request()->input('filters');
+        if ($filterResultsJSON) {
+            $filterResults = json_decode($filterResultsJSON, true);
+            if (isset($filterResults['rules']) && is_array($filterResults['rules'])) {
+                foreach ($filterResults['rules'] as $filterRules) {
+                    $customer->where($filterRules['field'], 'LIKE', '%' . $filterRules['data'] . '%');
+                }
+            }
+        }
+
+        $global_search = request()->input('global_search');
+        if ($global_search) {
+            $global_search = '%' . $global_search . '%';
+            $customer->where(function ($customer) use ($global_search) {
+                $customer->where('invoice', 'LIKE', $global_search)
+                    ->orWhere('nama', 'LIKE', $global_search)
+                    ->orWhere('tanggal', 'LIKE', $global_search)
+                    ->orWhere('jeniskelamin', 'LIKE', $global_search)
+                    ->orWhere('saldo', 'LIKE', $global_search);     
+            });
+        }
+        $data = $customer->orderBy($sidx, $sord)->offset($start)->limit($limit);
+        $result = $data->get();
+        
+        $tempData = [];
+        foreach($result as $index => $dataSales) 
+        {
+            $queryDetail = DB::table('detail_customers')
+                ->where('invoice', $dataSales->invoice)
+                ->get();
+            $numRows = $queryDetail->count();
+
+            $no = 1;
+
+            $salesDetail = [];
+            foreach($queryDetail as $dataDetail)
+            {
+                $dataDetail->no = $no++;
+                $salesDetail[] = (array)$dataSales + (array)$dataDetail;
+            }
+            if($numRows == 0)
+            {
+                $salesDetail[] = (array)$dataSales;
+            }
+
+            $tempData['sales'] = array_merge($tempData['sales'] ?? [], $salesDetail);
+            //dd($tempData);
+        }
+        return view('customer.report', ['data' => $tempData]);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function export(Request $request)
+    {
+        $invoice   = $request->invoice;
+
+        $customer = new Customer();
+        $data     = $customer->where('invoice', $invoice)->get();
+
+        $custDetail = new DetailCustomer();
+        $dataDetail = $custDetail->where('invoice', $invoice)->get();
+
+        return view('customer.export', ['data' => $data, 'detail' => $dataDetail]);
     }
 
     public function getPosition($invoice)

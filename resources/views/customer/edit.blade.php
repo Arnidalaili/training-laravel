@@ -14,8 +14,7 @@
         ->get();
 
         $invoice = $datacust[0]->invoice;
-        // var_dump($datacust);
-        // die;
+        
         $nama = $datacust[0]->nama;
         $tanggal = $datacust[0]->tanggal;
         $newtanggal = date("d-m-Y", strtotime($tanggal));
@@ -55,8 +54,8 @@
             </td>
             <td>
                 <select id="Jeniskelamin" class="FormElement ui-widget-content ui-corner-all JenisKelamin" name="Jeniskelamin" onkeyup="this.value=this.value.toUpperCase();" required value="<?php echo $jeniskelamin;?>">
-                    <option value="1">LAKI-LAKI</option>
-                    <option value="2">PEREMPUAN</option>
+                    <option value="LAKI-LAKI">LAKI-LAKI</option>
+                    <option value="PEREMPUAN">PEREMPUAN</option>
                 </select>
             </td>
         </tr>

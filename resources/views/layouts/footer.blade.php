@@ -22,7 +22,7 @@
 <body>
     <script>
         let indexRow = 0
-        let page = 1
+        let pager = 1
         let activeGrid = '#grid_id'
         let triggerClick = true
         let highlightSearch
@@ -354,7 +354,7 @@
                 buttonicon: "ui-icon-document",
                 onClickButton:function()
                 {
-                    $('#report_penjualan')
+                    $('#formheader')
                         .html(`
                             <div class="ui-state-default" style="padding: 5px;">
                                 <h5> Tentukan Baris </h5>
@@ -375,22 +375,37 @@
                                 'Report': function() 
                                 {
                                     invoice = $('#Invoice').val();
+                                    
                                     let start = $(this).find('input[name=start]').val()
                                     let limit = $(this).find('input[name=limit]').val()
                                     let params
 
-                                    if (parseInt(start) > parseInt(limit)) {
+                                    if (parseInt(start) > parseInt(limit)) 
+                                    {
                                         return alert('Sampai harus lebih besar')
                                     }
 
-                                    for (var key in postData) {
-                                    if (params != "") {
-                                        params += "&";
-                                    }
-                                    params += key + "=" + encodeURIComponent(postData[key]);
+                                    for (var key in postData) 
+                                    {
+                                        if (params != "") 
+                                        {
+                                            params += "&";
+                                        }
+                                        params += key + "=" + encodeURIComponent(postData[key]);
                                     }
 
-                                    window.open(`reportController.php?${params}&start=${start}&limit=${limit}&sidx=${postData.sidx}&sord=${postData.sord}&Invoice=${invoiceVal}`)
+                                    let url = `params/report?${params}&start=${start}&limit=${limit}&sidx=${postData.sidx}&sord=${postData.sord}&page=${postData.page}`;
+                                    if (postData.filters) 
+                                    {
+                                        url += `&filters=${postData.filters}`;
+                                    }
+                                    if (postData.global_search) 
+                                    {
+                                        url += `&global_search=${postData.global_search}`;
+                                    }
+                                    window.open(url);
+
+                                    //window.open(`reportController?${params}&start=${start}&limit=${limit}&sidx=${postData.sidx}&sord=${postData.sord}&Invoice=${invoiceVal}`)
                                 },
                                 'Cancel': function() 
                                 {
@@ -412,21 +427,35 @@
                 {
                     rowId = $(this).jqGrid('getGridParam', 'selrow');
                     cellVal = $(this).jqGrid('getCell', rowId, 'No. Invoice');
-                    row = $(this).jqGrid('getRowData', rowId, );
-                    invoiceVal = row["Invoice"];
+                    invoice = $(this).jqGrid('getRowData', rowId).invoice;
+                    
+                    
                     sortfield = $('#grid_id').jqGrid('getGridParam', 'postData').sidx;
                     sortorder = $('#grid_id').jqGrid('getGridParam', 'postData').sord;
                     pagesize = $('#grid_id').jqGrid('getGridParam', 'postData').rows;
                     pagenum = $('#grid_id').jqGrid('getGridParam', 'postData').page;
+                
                     
                     let params
-                    for (var key in postData) {
-                    if (params != "") {
-                        params += "&";
+                    for (var key in postData) 
+                    {
+                        if (params != "") 
+                        {
+                            params += "&";
+                        }
+                        params += key + "=" + encodeURIComponent(postData[key]);
                     }
-                    params += key + "=" + encodeURIComponent(postData[key]);
+
+                    let url = `params/export?${params}&invoice=${invoice}`;
+                    if (postData.filters) 
+                    {
+                        url += `&filters=${postData.filters}`;
                     }
-                    window.open(`exportController.php?${params}&sord=${sortorder}&sidx=${sortfield}&rows=${pagesize}&page=${pagenum}&invoice=${invoiceVal}`)
+                    if (postData.global_search) 
+                    {
+                        url += `&global_search=${postData.global_search}`;
+                    }
+                    window.open(url);
                 }
             });
         });
@@ -531,7 +560,8 @@
                             .each(function(index, element) {
                                 datanama = element.value;
                                 datanamabarang.push(element.value);
-                            })
+                            }) 
+                        
 
                         dataqtybarang = [];
                         qty = $(`input[name="Qty[]"]`)
@@ -564,14 +594,17 @@
                                 harga: datahargabarang
                             },
                         }).done(function(data) {
-                            if (data.message == 'success') {
+                            if (data.message == 'Success') {
                                 $('#formheader').dialog('close');
+                                $('#grid_id').trigger('reloadGrid', {
+                                        page: pager
+                                });
                                 
-                                filters = $('#grid_id').jqGrid('getGridParam').postData.filters;
-                                globals = $('#grid_id').jqGrid('getGridParam', 'postData').global_search;
-                                sortfield = $('#grid_id').jqGrid('getGridParam', 'postData').sidx;
-                                sortorder = $('#grid_id').jqGrid('getGridParam', 'postData').sord;
-                                pagesize = $('#grid_id').jqGrid('getGridParam', 'postData').rows;
+                                // filters = $('#grid_id').jqGrid('getGridParam').postData.filters;
+                                // globals = $('#grid_id').jqGrid('getGridParam', 'postData').global_search;
+                                // sortfield = $('#grid_id').jqGrid('getGridParam', 'postData').sidx;
+                                // sortorder = $('#grid_id').jqGrid('getGridParam', 'postData').sord;
+                                // pagesize = $('#grid_id').jqGrid('getGridParam', 'postData').rows;
                                 
                                 // let Invoice = data.invoice;
 
@@ -664,7 +697,7 @@
                         $.ajax(
                         {
                             url: '{{url('customers/params/update')}}',
-                            type: 'POST',
+                            type: 'GET',
                             dataType: 'JSON',
                             data : 
                             {
@@ -680,36 +713,37 @@
                             },
                         }).done(function(data)
                         {
-                            if (data.status == 'submitted') 
+                            if (data.message == 'Success') 
                             {
                                 $('#formheader').dialog('close');
+                                $('#grid_id').trigger('reloadGrid', {page:pager});
 
-                                invoice = data.invoice;
-                                filters = $('#grid_id').jqGrid('getGridParam').postData.filters;
-                                globals = $('#grid_id').jqGrid('getGridParam', 'postData').global_search;
-                                sortfield = $('#grid_id').jqGrid('getGridParam', 'postData').sidx;
-                                sortorder = $('#grid_id').jqGrid('getGridParam', 'postData').sord;
-                                pagesize = $('#grid_id').jqGrid('getGridParam', 'postData').rows;
-                                $.ajax({
-                                    url:"aftersave.php",
-                                    dataType: 'JSON',  
-                                    data: 
-                                    {           
-                                        Invoice: invoice,
-                                        sidx: sortfield,
-                                        sord: sortorder,
-                                        filter: filters,
-                                        globalsearch: globals,
-                                    }
-                                }).done(function(data)
-                                {
-                                    $('#cData').click();
-                                    let posisi = data.position;
-                                    let pager = Math.ceil(posisi / pagesize);
-                                    let rows = posisi - (pager - 1)* pagesize;
-                                    indexRow = rows-1;
-                                    $('#grid_id').trigger('reloadGrid', {page:pager});
-                                })
+                                // invoice = data.invoice;
+                                // filters = $('#grid_id').jqGrid('getGridParam').postData.filters;
+                                // globals = $('#grid_id').jqGrid('getGridParam', 'postData').global_search;
+                                // sortfield = $('#grid_id').jqGrid('getGridParam', 'postData').sidx;
+                                // sortorder = $('#grid_id').jqGrid('getGridParam', 'postData').sord;
+                                // pagesize = $('#grid_id').jqGrid('getGridParam', 'postData').rows;
+                                // $.ajax({
+                                //     url:"aftersave.php",
+                                //     dataType: 'JSON',  
+                                //     data: 
+                                //     {           
+                                //         Invoice: invoice,
+                                //         sidx: sortfield,
+                                //         sord: sortorder,
+                                //         filter: filters,
+                                //         globalsearch: globals,
+                                //     }
+                                // }).done(function(data)
+                                // {
+                                //     $('#cData').click();
+                                //     let posisi = data.position;
+                                //     let pager = Math.ceil(posisi / pagesize);
+                                //     let rows = posisi - (pager - 1)* pagesize;
+                                //     indexRow = rows-1;
+                                //     $('#grid_id').trigger('reloadGrid', {page:pager});
+                                // })
                             }
                         })
                     },
@@ -724,7 +758,7 @@
 
         function confirmDel(noInvoice)
         {
-            $('#formheader').load('formdel/'+invoice,)
+            $('#formheader').load('formdel/' + invoice,)
             .dialog
             ({
                 modal:true,
@@ -752,12 +786,17 @@
             invoice = $('#Invoice').val().toUpperCase();  
             $.ajax(
             {
-                url: 'params/destroy/'+ invoice,
+                url: '{{url('customers/params/destroy')}}',
                 type: 'GET',
                 dataType: 'JSON',
+                data : 
+                {
+                    _token: '{{csrf_token()}}',
+                    invoice : invoice, 
+                },
             }).done(function(data)
             {
-                if (data.status == 'submitted') 
+                if (data.message == 'Success') 
                 {
                     $('#formheader').dialog('close')
                     $('#grid_id').trigger('reloadGrid')

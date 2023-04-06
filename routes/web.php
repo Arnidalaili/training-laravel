@@ -27,11 +27,14 @@ Route::prefix('customers')->group(function ()
     Route::get('detail/{invoice}', [CustomerController::class, 'indexDetail']);
     Route::post('params/store', [CustomerController::class, 'store']);
     Route::post('params/store/{invoice}', [CustomerController::class, 'getPosition']);
-    Route::get('params/update/{invoice}', [CustomerController::class, 'update']);
-    Route::get('params/destroy/{invoice}', [CustomerController::class, 'delete']);
+    Route::get('params/update', [CustomerController::class, 'update']);
+    Route::get('params/destroy', [CustomerController::class, 'destroy']);
+    Route::get('params/report', [CustomerController::class, 'report']);
+    Route::get('params/export', [CustomerController::class, 'export']);
     Route::get('formadd', [CustomerController::class, 'formAdd']);
     Route::get('formedit/{invoice}', [CustomerController::class, 'formEdit']);
     Route::get('formdel/{invoice}', [CustomerController::class, 'formDel']);
+    
 });
 
 
