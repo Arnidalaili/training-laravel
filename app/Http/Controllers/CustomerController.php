@@ -359,7 +359,7 @@ class CustomerController extends Controller
                 $salesDetail[] = (array)$dataSales;
             }
 
-            $tempData['sales'] = array_merge($tempData['sales'] ?? [], $salesDetail);
+            $tempData['sales'] = array_merge($tempdata['sales'] ?? [], $salesDetail);
             //dd($tempData);
         }
         return view('customer.report', ['data' => $tempData]);

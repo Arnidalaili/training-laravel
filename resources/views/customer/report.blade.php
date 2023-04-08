@@ -28,14 +28,14 @@
                 report.loadFile("{{ asset('reports/penjualanDetail.mrt') }}")
                 
                 report.dictionary.dataSources.clear() 
-                
+                 
                 dataSet.readJson(<?= json_encode($data) ?>)
                 report.regData(dataSet.dataSetName, '', dataSet)
                 report.dictionary.synchronize()
 
                 viewer.report = report
-                designer.renderHtml("content")
-                designer.report = report
+                // designer.renderHtml("content")
+                // designer.report = report
             }
         </script>
         <style type="text/css">
