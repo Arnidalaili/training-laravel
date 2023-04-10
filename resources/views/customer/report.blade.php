@@ -25,7 +25,7 @@
                 var dataSet = new Stimulsoft.System.Data.DataSet("Data")
                  
                 viewer.renderHtml('content')
-                report.loadFile("{{ asset('reports/penjualanDetail.mrt') }}")
+                report.loadFile("{{ asset('reports/penjualan(1).mrt') }}")
                 
                 report.dictionary.dataSources.clear() 
                  

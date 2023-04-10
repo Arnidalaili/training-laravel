@@ -533,9 +533,7 @@
         function addPenjualan() {
             $('#formheader').load('formadd', function() {
                 $.ajax({
-                        //url: 'datastructure.php',
                         type: 'GET',
-                        //dataType: 'JSON'
                     })
                     .done(function(res) {
                         let field = res.structure;
@@ -594,42 +592,42 @@
                                 harga: datahargabarang
                             },
                         }).done(function(data) {
-                            if (data.message == 'Success') {
+                            if (data.message == 'Success') 
+                            {
                                 $('#formheader').dialog('close');
                                 $('#grid_id').trigger('reloadGrid', {
                                         page: pager
                                 });
                                 
-                                // filters = $('#grid_id').jqGrid('getGridParam').postData.filters;
-                                // globals = $('#grid_id').jqGrid('getGridParam', 'postData').global_search;
-                                // sortfield = $('#grid_id').jqGrid('getGridParam', 'postData').sidx;
-                                // sortorder = $('#grid_id').jqGrid('getGridParam', 'postData').sord;
-                                // pagesize = $('#grid_id').jqGrid('getGridParam', 'postData').rows;
-                                
-                                // let Invoice = data.invoice;
+                                filters = $('#grid_id').jqGrid('getGridParam').postData.filters;
+                                globals = $('#grid_id').jqGrid('getGridParam', 'postData').global_search;
+                                sortfield = $('#grid_id').jqGrid('getGridParam', 'postData').sidx;
+                                sortorder = $('#grid_id').jqGrid('getGridParam', 'postData').sord;
+                                pagesize = $('#grid_id').jqGrid('getGridParam', 'postData').rows;
 
-                                // $.ajax({
-                                    //////{url: `detail/`+invoice}
-                                //     url: URL + invoice,
-                                //     dataType: 'JSON',
-                                //     data: {
-                                //         _token: '{{csrf_token()}}',
-                                //         invoice: JSON.parse(invoice),
-                                //         sidx: sortfield,
-                                //         sord: sortorder,
-                                //         filter: filters,
-                                //         globalsearch: globals,
-                                //     }
-                                // }).done(function(data) {
-                                //     $('#cData').click();
-                                //     let posisi = data.position;
-                                //     let pager = Math.ceil(posisi / pagesize);
-                                //     let rows = posisi - (pager - 1) * pagesize;
-                                //     indexRow = rows - 1;
-                                //     $('#grid_id').trigger('reloadGrid', {
-                                //         page: pager
-                                //     });
-                                // })
+                                let invoice = data.data;
+                                
+                                $.ajax({
+                                    url: "customers/params/store"+ invoice + "/position",
+                                    dataType: 'JSON',
+                                    data: {
+                                        _token: '{{csrf_token()}}',
+                                        invoice: JSON.parse(invoice),
+                                        sidx: sortfield,
+                                        sord: sortorder,
+                                        filter: filters,
+                                        globalsearch: globals,
+                                    }
+                                }).done(function(data) {
+                                    $('#cData').click();
+                                    let posisi = data.position;
+                                    let pager = Math.ceil(posisi / pagesize);
+                                    let rows = posisi - (pager - 1) * pagesize;
+                                    indexRow = rows - 1;
+                                    $('#grid_id').trigger('reloadGrid', {
+                                        page: pager
+                                    });
+                                })
                             }
                         })
                     },

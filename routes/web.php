@@ -26,7 +26,7 @@ Route::prefix('customers')->group(function ()
     Route::get('index', [CustomerController::class, 'index']);
     Route::get('detail/{invoice}', [CustomerController::class, 'indexDetail']);
     Route::post('params/store', [CustomerController::class, 'store']);
-    Route::post('params/store/{invoice}', [CustomerController::class, 'getPosition']);
+    Route::post('params/store/{invoice}/position', [CustomerController::class, 'position']);
     Route::get('params/update', [CustomerController::class, 'update']);
     Route::get('params/destroy', [CustomerController::class, 'destroy']);
     Route::get('params/report', [CustomerController::class, 'report']);
