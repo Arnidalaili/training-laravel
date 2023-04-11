@@ -14,15 +14,13 @@
         ->get();
 
         $invoice = $datacust[0]->invoice;
-        // var_dump($datacust);
-        // die;
+        
         $nama = $datacust[0]->nama;
         $tanggal = $datacust[0]->tanggal;
         $newtanggal = date("d-m-Y", strtotime($tanggal));
         $jeniskelamin = $datacust[0]->jeniskelamin;
         $saldo = $datacust[0]->saldo;
-        // var_dump($newtanggal);
-        // die;
+        
     ?>
     <table width="100%" cellspacing="0" id="editData">
         <tr>

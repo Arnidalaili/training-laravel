@@ -7,6 +7,8 @@ use App\Models\DetailCustomer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use \stdClass;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CustomerController extends Controller
 {
@@ -128,11 +130,9 @@ class CustomerController extends Controller
                 $customers->jeniskelamin  = $request->input('jeniskelamin');
                 $customers->saldo         = intval(str_replace(".", "", $request->input('saldo')));
                 $customers->save();
-            }
-            $inv = $customers->invoice;
-            $invoice = JSON.parse($inv);
-            dd($invoice);
 
+                $inv = $customers->invoice;
+            }
             DB::commit();
             $response = [
                 'message' =>'Success',
@@ -302,9 +302,8 @@ class CustomerController extends Controller
         return view('customer.export', ['data' => $data, 'detail' => $dataDetail]);
     }
  
-    public function position($invoice)
+    public function position(Request $request, $invoice)
     {
-        dd('test');
         $customer = new Customer();
        
         $sidx = request('sidx', 'invoice');
@@ -313,7 +312,7 @@ class CustomerController extends Controller
         $filters = request('filters') ? json_decode(request('filters')) : null;
         $search = request()->has('_search');
 
-        $data = $customer->getPosition($sidx, $sord, $global_search, $filters, $search);
+        $data = $customer->getPosition($sidx, $sord, $global_search, $filters, $search, $invoice);
         
         return response()->json($data);
     }

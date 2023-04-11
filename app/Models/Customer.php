@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use \stdClass;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class Customer extends Model
 {
@@ -50,19 +52,24 @@ class Customer extends Model
         );
 
         $filterResultsJSON = request()->input('filters');
-        if ($filterResultsJSON) {
+        if ($filterResultsJSON) 
+        {
             $filterResults = json_decode($filterResultsJSON, true);
-            if (isset($filterResults['rules']) && is_array($filterResults['rules'])) {
-                foreach ($filterResults['rules'] as $filterRules) {
+            if (isset($filterResults['rules']) && is_array($filterResults['rules'])) 
+            {
+                foreach ($filterResults['rules'] as $filterRules) 
+                {
                     $query->where($filterRules['field'], 'LIKE', '%' . $filterRules['data'] . '%');
                 }
             }
         }
 
         $global_search = request()->input('global_search');
-        if ($global_search) {
+        if ($global_search) 
+        {
             $global_search = '%' . $global_search . '%';
-            $query->where(function ($query) use ($global_search) {
+            $query->where(function ($query) use ($global_search) 
+            {
                 $query->where('invoice', 'LIKE', $global_search)
                     ->orWhere('nama', 'LIKE', $global_search)
                     ->orWhere('tanggal', 'LIKE', $global_search)
@@ -156,10 +163,9 @@ class Customer extends Model
         return $tempData;
     }
 
-    public function getPosition($sidx, $sord, $global_search, $filters, $search)
+    public function getPosition($sidx, $sord, $global_search, $filters, $search, $invoice)
     {
-        $table = 'temporary';
-
+        $table = 'temp';
         Schema::create($table, function (Blueprint $table) {
             $table->integer('id');
             $table->increments('position')->unique();
@@ -167,24 +173,28 @@ class Customer extends Model
             $table->string('nama');
             $table->date('tanggal');
             $table->string('jeniskelamin');
-            $table->integer('saldo'); 
+            $table->float('saldo'); 
            
             $table->timestamps();
         });
         
-        $query = DB::table('customers')->select(
-            'customers.id',
-            'customers.invoice',
-            'customers.nama',
-            'customers.tanggal',
-            'customers.jeniskelamin',
-            'customers.saldo',
-            'customers.created_at',
-            'customers.updated_at',
-        );
-
-        if ($global_search) {
-            $query->where(function ($query) use ($global_search) {
+        $query = DB::table('customers');
+        $query->select(
+        [
+            'id', 
+            'invoice', 
+            'nama', 
+            'tanggal', 
+            'jeniskelamin',
+            'saldo', 
+            'created_at', 
+            'updated_at'
+        ]);
+        
+        if ($global_search) 
+        {
+            $query->where(function ($query) use ($global_search) 
+            {
                 $query->where('invoice', 'like', '%' . $global_search . '%')
                     ->orWhere('nama', 'like', '%' . $global_search . '%')
                     ->orWhere('tanggal', 'like', '%' . $global_search . '%')
@@ -194,8 +204,10 @@ class Customer extends Model
             });
         }
 
-        if ($filters) {
-            foreach ($filters->rules as $rule) {
+        if ($filters) 
+        {
+            foreach ($filters->rules as $rule) 
+            {
                 $query->where($rule->field, 'like', '%' . $rule->data . '%');
             }
         }
@@ -204,7 +216,8 @@ class Customer extends Model
 
         $querys = $query->get();
 
-        $data = $querys->map(function ($query,$index) {
+        $data = $querys->map(function ($query,$index) 
+        {
             return [
                 'id' => $query->id,
                 'invoice' => $query->invoice,
@@ -217,12 +230,10 @@ class Customer extends Model
             ];
         })->toArray();
 
-        // dd($query->invoice);
-
         DB::table($table)->insert($data);
 
-        $position = DB::table($table)->where('id', $id)->value('position');
-
+        $position = DB::table($table)->where('invoice', $invoice)->value('position');
+        
         $data = [
             'posisi' => $position,
         ];
