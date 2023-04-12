@@ -194,9 +194,9 @@
             alias: 'numeric',
             groupSeparator: '.',
             autoGroup: true,
-			digitsOptional: false,
-			allowMinus: false,
-			placeholder: '',
+			// digitsOptional: false,
+			// allowMinus: false,
+			// placeholder: '',
         })
     }
 

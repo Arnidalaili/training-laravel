@@ -20,7 +20,7 @@ class AddCustomer extends Migration
             $table->date('tanggal');
             $table->string('jeniskelamin');
             $table->double('saldo');
-            $table->timestamps(); 
+            $table->timestamps();
         });
     }
 

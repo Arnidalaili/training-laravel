@@ -178,6 +178,7 @@ class Customer extends Model
             $table->timestamps();
         });
         
+        
         $query = DB::table('customers');
         $query->select(
         [
@@ -190,6 +191,7 @@ class Customer extends Model
             'created_at', 
             'updated_at'
         ]);
+        
         
         if ($global_search) 
         {
@@ -215,6 +217,7 @@ class Customer extends Model
         $query->orderBy($sidx, $sord);
 
         $querys = $query->get();
+        
 
         $data = $querys->map(function ($query,$index) 
         {
@@ -229,9 +232,10 @@ class Customer extends Model
                 'updated_at' => $query->updated_at,
             ];
         })->toArray();
-
+        
         DB::table($table)->insert($data);
-
+        
+        
         $position = DB::table($table)->where('invoice', $invoice)->value('position');
         
         $data = [

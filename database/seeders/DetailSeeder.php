@@ -21,13 +21,13 @@ class DetailSeeder extends Seeder
 
         $customerInv = Customer::pluck('invoice');
         foreach ($customerInv as $inv) {
-            for ($i = 1; $i <= 3; $i++) 
+            for ($i = 1; $i <= 2; $i++) 
             {
                 DB::table('detail_customers')->insert([
                     'invoice' => $inv,
                     'namabarang' =>$faker->word(),
                     'qty' => $faker->numberBetween(1, 50),
-                    'harga' => rand(0, 1000000),
+                    'harga' => rand(0, 10000000),
                     'created_at' => $now,
                     'updated_at' => $now
                 ]);

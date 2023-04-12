@@ -12,7 +12,7 @@
                 <label>No.Invoice</label>
             </td>
             <td>
-                <input type="text" id="Invoice" name="Invoice" class="FormElement ui-widget-content ui-corner-all" onkeyup="this.value=this.value.toUpperCase();" autocomplete="off">
+                <input type="text" id="Invoice" name="Invoice" class="FormElement ui-widget-content ui-corner-all" readonly onkeyup="this.value=this.value.toUpperCase();" autocomplete="off">
             </td>
         </tr>
         <tr>

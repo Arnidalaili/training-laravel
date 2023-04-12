@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Faker\Factory as Faker;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use Faker\Provider\Base;
 
 class CustomerSeeder extends Seeder
 {
@@ -20,9 +21,9 @@ class CustomerSeeder extends Seeder
         $faker = Faker::create();
         $now = date('Y-m-d H:i:s');
 
-        for ($i = 1; $i <= 100; $i++) {
+        for ($i = 1; $i <= 200; $i++) {
             DB::table('customers')->insert([
-                'invoice' => $this->generateInvoiceNumber($i),
+                'invoice' => $faker->unique()->numberBetween(1,500),
                 'nama' => $faker->name(),
                 'tanggal' => Carbon::create('2000', '01', '01')->addDays($i),
                 'jeniskelamin' =>$faker->randomElement(['LAKI-LAKI', 'PEREMPUAN']),
@@ -31,16 +32,5 @@ class CustomerSeeder extends Seeder
                 'updated_at' => $now
             ]);
         }
-    }
-
-    private function generateInvoiceNumber($number)
-    {
-        $prefix = 'INV';
-        $padding = 3; // Set the number of digits for the invoice number
-        
-        // Generate the invoice number with the desired format
-        $invoiceNumber = $prefix . str_pad($number, $padding, '0', STR_PAD_LEFT);
-        
-        return $invoiceNumber;
     }
 }

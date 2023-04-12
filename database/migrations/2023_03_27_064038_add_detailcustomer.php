@@ -21,7 +21,7 @@ class AddDetailcustomer extends Migration
             $table->double('harga');
             $table->timestamps(); 
 
-            $table->foreign('invoice', 'customers_detail_customers_invoice_foreign')->references('invoice')->on('customers');
+            
         });
     }
 

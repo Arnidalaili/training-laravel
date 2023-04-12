@@ -136,11 +136,7 @@
                         formatter:'currency',
                         formatoptions:
                         {
-                            thousandsSeparator: ".",
-                            decimalSeparator: ",",
-                            decimalPlaces : 2,
                             prefix : 'Rp ',  
-                            deaultValue: "Rp 0.00",
                         },
                         searchoptions: 
                         {
@@ -528,7 +524,8 @@
             })
         });
 
-        function addPenjualan() {
+        function addPenjualan() 
+        {
             $('#formheader').load('formadd', function() {
                 $.ajax({
                         type: 'POST',
@@ -714,7 +711,8 @@
                                 sortorder = $('#grid_id').jqGrid('getGridParam', 'postData').sord;
                                 pagesize = $('#grid_id').jqGrid('getGridParam', 'postData').rows;
 
-                                let invoice = data.data;
+                                let invoice = data.invoice;
+                                
                                 
                                 $.ajax({
                                     url: "params/" + invoice + "/position",

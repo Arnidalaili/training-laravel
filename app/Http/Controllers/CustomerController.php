@@ -88,22 +88,31 @@ class CustomerController extends Controller
      */
     public function store(Request $request)
     {
+
+        
+        
+
         DB::beginTransaction();
         try
         {
-            $request->validate
-            ([
-                'invoice' => 'required',
-                'nama' => 'required',
-                'tanggal' => 'required',
-                'jeniskelamin' => 'required',
-                'saldo' => 'required',
-            ]);
+            $lastInvoice = DB::table('customers')->orderByDesc('invoice')->first();
+            $lastInvoiceNumber = $lastInvoice ? $lastInvoice->invoice : 0;
+            $newInvoiceNumber = $lastInvoiceNumber + 1;
+            $prefix = 'INV-'; 
+            $newInvoiceNumberWithPrefix = $prefix . str_pad($newInvoiceNumber, 3, '0', STR_PAD_LEFT); 
 
             if($request->filled('namabarang'))
             {
+                $request->validate
+                ([
+                    'nama' => 'required',
+                    'tanggal' => 'required',
+                    'jeniskelamin' => 'required',
+                    'saldo' => 'required',
+                ]);
+                
                 $customers = new Customer();
-                $customers->invoice       = $request->input('invoice');
+                $customers->invoice       = $newInvoiceNumberWithPrefix;
                 $customers->nama          = $request->input('nama');
                 $customers->tanggal       = date('Y-m-d', strtotime($request->input('tanggal')));
                 $customers->jeniskelamin  = $request->input('jeniskelamin');
@@ -124,7 +133,7 @@ class CustomerController extends Controller
             else
             {
                 $customers = new Customer();
-                $customers->invoice       = $request->input('invoice');
+                $customers->invoice       = $newInvoiceNumberWithPrefix;
                 $customers->nama          = $request->input('nama');
                 $customers->tanggal       = date('Y-m-d', strtotime($request->input('tanggal')));
                 $customers->jeniskelamin  = $request->input('jeniskelamin');
@@ -205,6 +214,14 @@ class CustomerController extends Controller
                     $custdetail->harga        = str_replace(".", "", $request->input('harga')[$index]);
                     $custdetail->save(); 
                 }
+            } else {
+                $customers = Customer::where('invoice', $invoice)->firstOrFail();
+                $customers->invoice       = $invoice;
+                $customers->nama          = $nama;
+                $customers->tanggal       = $tanggal;
+                $customers->jeniskelamin  = $jeniskelamin;
+                $customers->saldo         = $saldo;
+                $customers->save();
             }
 
             DB::commit();
@@ -305,6 +322,7 @@ class CustomerController extends Controller
     public function position(Request $request, $invoice)
     {
         $customer = new Customer();
+        
        
         $sidx = request('sidx', 'invoice');
         $sord = request('sord', 'asc');
