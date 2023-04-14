@@ -18,9 +18,6 @@ class InvoiceObserver
         $nextInvoiceSequence = $lastInvoice ? $lastInvoice->invoice_sequence + 1 : 1; 
         $customer->invoice_sequence = $nextInvoiceSequence; 
         
-        
-
-        // Generate invoice number dengan prefix "INV"
         $invoiceNumber = 'INV' . sprintf('%03d', $nextInvoiceSequence);
         $customer->invoice = $invoiceNumber;
     }

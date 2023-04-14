@@ -23,11 +23,13 @@ class Customer extends Model
         'jeniskelamin',
         'saldo',
     ];
+
     protected $hidden = [
         'id', 
         'created_at',
         'updated_at'
     ];
+    
     public $timestamps = true;
     protected $dateFormat = 'Y-m-d';
 

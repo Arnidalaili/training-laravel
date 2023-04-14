@@ -101,7 +101,6 @@ class CustomerController extends Controller
                     'jeniskelamin' => 'required',
                     'saldo' => 'required',
                 ]);
-                $tanggal = 
                 
                 $customers = new Customer();
                 $customers->nama          = $request->input('nama');
@@ -111,17 +110,16 @@ class CustomerController extends Controller
                 $customers->save();
 
                 $inv = $customers->invoice;
-            
-                foreach ($request->input('namabarang') as $index => $item)
-                {
-                    $custdetail = new DetailCustomer();
-                    $custdetail->invoice      = $inv;
-                    $custdetail->namabarang   = $item;
-                    $custdetail->qty          = $request->input('qty')[$index];
-                    $custdetail->harga        = str_replace(".", "", $request->input('harga')[$index]);
-                    $custdetail->save(); 
+
+                foreach ($request->input('namabarang') as $index => $item) {
+                    $data = [
+                        'invoice'    => $inv,
+                        'namabarang' => $item,
+                        'qty'        => $request->input('qty')[$index],
+                        'harga'      => str_replace(".", "", $request->input('harga')[$index])
+                    ];
+                    DetailCustomer::insert($data);
                 }
-                dd($custdetail);
             }
             else
             {
@@ -183,31 +181,30 @@ class CustomerController extends Controller
         try
         {
             DB::beginTransaction();
-            
-            $customers = Customer::where('invoice', $invoice)->firstOrFail();
-            $customers->invoice       = $invoice;
-            $customers->nama          = $nama;
-            $customers->tanggal       = $tanggal;
-            $customers->jeniskelamin  = $jeniskelamin;
-            $customers->saldo         = $saldo;
-            $customers->save();
-
-            $inv = $customers->invoice;
-
             if($request->filled('namabarang'))
             {   
+                $customers = Customer::where('invoice', $invoice)->firstOrFail();
+                $customers->invoice       = $invoice;
+                $customers->nama          = $nama;
+                $customers->tanggal       = $tanggal;
+                $customers->jeniskelamin  = $jeniskelamin;
+                $customers->saldo         = $saldo;
+                $customers->save();
+    
+                $inv = $customers->invoice;
+
                 DB::table('detail_customers')
                 ->where('invoice',$inv)
                 ->delete();
 
-                foreach ($request->input('namabarang') as $index => $item)
-                {
-                    $custdetail = new DetailCustomer();
-                    $custdetail->invoice      = $inv;
-                    $custdetail->namabarang   = $item;
-                    $custdetail->qty          = $request->input('qty')[$index];
-                    $custdetail->harga        = str_replace(".", "", $request->input('harga')[$index]);
-                    $custdetail->save(); 
+                foreach ($request->input('namabarang') as $index => $item) {
+                    $data = [
+                        'invoice'    => $inv,
+                        'namabarang' => $item,
+                        'qty'        => $request->input('qty')[$index],
+                        'harga'      => str_replace(".", "", $request->input('harga')[$index])
+                    ];
+                    DetailCustomer::insert($data);
                 }
             } else {
                 $customers = Customer::where('invoice', $invoice)->firstOrFail();
