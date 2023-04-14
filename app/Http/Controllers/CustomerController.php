@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use \stdClass;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+    
 
 class CustomerController extends Controller
 {
@@ -19,7 +20,7 @@ class CustomerController extends Controller
     {
         return view('customer.index');
     }
-    /**
+    /**  
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
@@ -88,19 +89,9 @@ class CustomerController extends Controller
      */
     public function store(Request $request)
     {
-
-        
-        
-
         DB::beginTransaction();
         try
         {
-            $lastInvoice = DB::table('customers')->orderByDesc('invoice')->first();
-            $lastInvoiceNumber = $lastInvoice ? $lastInvoice->invoice : 0;
-            $newInvoiceNumber = $lastInvoiceNumber + 1;
-            $prefix = 'INV-'; 
-            $newInvoiceNumberWithPrefix = $prefix . str_pad($newInvoiceNumber, 3, '0', STR_PAD_LEFT); 
-
             if($request->filled('namabarang'))
             {
                 $request->validate
@@ -110,9 +101,9 @@ class CustomerController extends Controller
                     'jeniskelamin' => 'required',
                     'saldo' => 'required',
                 ]);
+                $tanggal = 
                 
                 $customers = new Customer();
-                $customers->invoice       = $newInvoiceNumberWithPrefix;
                 $customers->nama          = $request->input('nama');
                 $customers->tanggal       = date('Y-m-d', strtotime($request->input('tanggal')));
                 $customers->jeniskelamin  = $request->input('jeniskelamin');
@@ -120,6 +111,7 @@ class CustomerController extends Controller
                 $customers->save();
 
                 $inv = $customers->invoice;
+            
                 foreach ($request->input('namabarang') as $index => $item)
                 {
                     $custdetail = new DetailCustomer();
@@ -129,16 +121,18 @@ class CustomerController extends Controller
                     $custdetail->harga        = str_replace(".", "", $request->input('harga')[$index]);
                     $custdetail->save(); 
                 }
+                dd($custdetail);
             }
             else
             {
                 $customers = new Customer();
-                $customers->invoice       = $newInvoiceNumberWithPrefix;
+                
                 $customers->nama          = $request->input('nama');
                 $customers->tanggal       = date('Y-m-d', strtotime($request->input('tanggal')));
                 $customers->jeniskelamin  = $request->input('jeniskelamin');
                 $customers->saldo         = intval(str_replace(".", "", $request->input('saldo')));
                 $customers->save();
+               
 
                 $inv = $customers->invoice;
             }
@@ -152,6 +146,7 @@ class CustomerController extends Controller
         }
         catch(Exception $e)
         {
+            DB::rollback();
             $res = [
                 'status' => 500,
                 'message' => $e->getMessage()
@@ -233,6 +228,7 @@ class CustomerController extends Controller
         }
         catch(Exception $e)
         {
+            DB::rollback();
             $res = [
                 'status' => 500,
                 'message' => $e->getMessage()

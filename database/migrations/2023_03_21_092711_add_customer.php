@@ -15,10 +15,11 @@ class AddCustomer extends Migration
     {
         Schema::create('customers', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('invoice')->unique();
-            $table->string('nama');
+            $table->string('invoice', 10)->notNullable();
+            $table->unsignedInteger('invoice_sequence')->unique();
+            $table->string('nama', 150);
             $table->date('tanggal');
-            $table->string('jeniskelamin');
+            $table->string('jeniskelamin', 10);
             $table->double('saldo');
             $table->timestamps();
         });
@@ -31,6 +32,6 @@ class AddCustomer extends Migration
      */
     public function down()
     {
-        //
+        Schema::dropIfExists('customers');
     }
 }

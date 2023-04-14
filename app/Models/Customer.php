@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use \stdClass;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Observers\InvoiceObserver;
 
 class Customer extends Model
 {
@@ -37,6 +38,10 @@ class Customer extends Model
         $data = $query->get();
         return $data; 
     }
+
+    protected $dispatchesEvents = [
+        'creating' => InvoiceObserver::class,
+    ];
 
     public function getIndex($page,  $sidx, $sord, $filters, $limit)
     {

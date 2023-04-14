@@ -528,7 +528,7 @@
         {
             $('#formheader').load('formadd', function() {
                 $.ajax({
-                        type: 'POST',
+                        type: 'GET',
                     })
                     .done(function(res) {
                         let field = res.structure;

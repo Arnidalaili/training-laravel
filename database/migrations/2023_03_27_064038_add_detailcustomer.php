@@ -15,13 +15,11 @@ class AddDetailcustomer extends Migration
     {
         Schema::create('detail_customers', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('invoice');
-            $table->string('namabarang');
-            $table->string('qty');
+            $table->string('invoice', 10);
+            $table->string('namabarang', 150);
+            $table->integer('qty');
             $table->double('harga');
             $table->timestamps(); 
-
-            
         });
     }
 
