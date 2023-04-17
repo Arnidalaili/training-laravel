@@ -131,7 +131,6 @@ class CustomerController extends Controller
                 $customers->saldo         = intval(str_replace(".", "", $request->input('saldo')));
                 $customers->save();
                
-
                 $inv = $customers->invoice;
             }
             DB::commit();
@@ -139,7 +138,7 @@ class CustomerController extends Controller
                 'message' =>'Success',
                 'data' => $inv,
             ];
-            
+              
             return response()->json($response); 
         }
         catch(Exception $e)
