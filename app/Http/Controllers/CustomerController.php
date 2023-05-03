@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use \stdClass;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Rules\DoubleRule;
     
 
 class CustomerController extends Controller
@@ -94,14 +95,24 @@ class CustomerController extends Controller
         {
             if($request->filled('namabarang'))
             {
-                $request->validate
-                ([
-                    'nama' => 'required',
-                    'tanggal' => 'required',
-                    'jeniskelamin' => 'required',
-                    'saldo' => 'required',
+                $request->validate([    
+                    'nama' => 'required|string|max:255',    
+                    'tanggal' => 'required|date',    
+                    'jeniskelamin' => 'required',    
+                    'saldo' => ['required', 'min:0'],    
+                    'namabarang.*' => 'required|string|max:255',    
+                    'qty.*' => 'required|integer|min:1',    
+                    'harga' => ['required','min:0'], 
+                ], [    
+                    'nama.required' => 'Nama harus diisi','nama.string' => 'Nama harus berupa string','nama.max' => 'Nama maksimal 255 karakter',    
+                    'tanggal.required' => 'Tanggal harus diisi','tanggal.date' => 'Tanggal harus berupa format date',    
+                    'jeniskelamin.required' => 'Jenis kelamin harus diisi',     
+                    'saldo.required' => 'Saldo harus diisi','saldo.min' => 'Saldo tidak boleh negatif',    
+                    'namabarang.*.required' => 'Nama barang harus diisi','namabarang.*.string' => 'Nama barang harus berupa string','namabarang.*.max' => 'Nama barang maksimal 255 karakter',    
+                    'qty.*.required' => 'Kuantitas harus diisi','qty.*.integer' => 'Kuantitas harus berupa angka','qty.*.min' => 'Kuantitas tidak boleh kurang dari 1',    
+                    'harga.*.required' => 'Harga harus diisi','harga.*.min' => 'Harga tidak boleh kurang dari 0',
                 ]);
-                
+
                 $customers = new Customer();
                 $customers->nama          = $request->input('nama');
                 $customers->tanggal       = date('Y-m-d', strtotime($request->input('tanggal')));
@@ -120,11 +131,11 @@ class CustomerController extends Controller
                     ];
                     DetailCustomer::insert($data);
                 }
+                //DB::table('customers')->where('invoice', $inv)->lockForUpdate()->get();
             }
             else
             {
                 $customers = new Customer();
-                
                 $customers->nama          = $request->input('nama');
                 $customers->tanggal       = date('Y-m-d', strtotime($request->input('tanggal')));
                 $customers->jeniskelamin  = $request->input('jeniskelamin');
@@ -132,6 +143,8 @@ class CustomerController extends Controller
                 $customers->save();
                
                 $inv = $customers->invoice;
+
+                //DB::table('customers')->where('invoice', $inv)->lockForUpdate()->get(); 
             }
             DB::commit();
             $response = [
@@ -140,6 +153,16 @@ class CustomerController extends Controller
             ];
               
             return response()->json($response); 
+        }
+        catch(ValidationException $e)
+        {
+            DB::rollback();
+            $res = [        
+                'status' => 422,        
+                'message' => 'Validation error',        
+                'errors' => $e->validator->errors()    
+            ];
+            return response()->json($res);
         }
         catch(Exception $e)
         {
@@ -161,13 +184,22 @@ class CustomerController extends Controller
      */
     public function update(Request $request)
     {
-        $request->validate
-        ([
-            'invoice'      => 'required',
-            'nama'         => 'required',
-            'tanggal'      => 'required',
-            'jeniskelamin' => 'required',
-            'saldo'        => 'required',
+        $request->validate([    
+            'nama' => 'required|string|max:255',    
+            'tanggal' => 'required|date',    
+            'jeniskelamin' => 'required',    
+            'saldo' => ['required', 'min:0'],    
+            'namabarang.*' => 'required|string|max:255',    
+            'qty.*' => 'required|integer|min:1',    
+            'harga' => ['required','min:0'], 
+        ], [    
+            'nama.required' => 'Nama harus diisi','nama.string' => 'Nama harus berupa string','nama.max' => 'Nama maksimal 255 karakter',    
+            'tanggal.required' => 'Tanggal harus diisi','tanggal.date' => 'Tanggal harus berupa format date',    
+            'jeniskelamin.required' => 'Jenis kelamin harus diisi',     
+            'saldo.required' => 'Saldo harus diisi','saldo.min' => 'Saldo tidak boleh negatif',    
+            'namabarang.*.required' => 'Nama barang harus diisi','namabarang.*.string' => 'Nama barang harus berupa string','namabarang.*.max' => 'Nama barang maksimal 255 karakter',    
+            'qty.*.required' => 'Kuantitas harus diisi','qty.*.integer' => 'Kuantitas harus berupa angka','qty.*.min' => 'Kuantitas tidak boleh kurang dari 1',    
+            'harga.*.required' => 'Harga harus diisi','harga.*.min' => 'Harga tidak boleh kurang dari 0',
         ]);
 
         $customers = new Customer();
@@ -221,6 +253,16 @@ class CustomerController extends Controller
                 'invoice' => $inv,
             ];
             return response()->json($response); 
+        }
+        catch(ValidationException $e)
+        {
+            DB::rollback();
+            $res = [        
+                'status' => 422,        
+                'message' => 'Validation error',        
+                'errors' => $e->validator->errors()    
+            ];
+            return response()->json($res);
         }
         catch(Exception $e)
         {
